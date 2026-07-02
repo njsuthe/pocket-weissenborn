@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Pocket Weissenborn — Open D</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1c1612">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Weissenborn">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Lap Steel · Slide · Open D</div>
+      <h1>Pocket <em>Weissenborn</em></h1>
+      <p class="sub">A playable Open D fretboard. Tap any fret to pluck the note — sweep a finger across the strings to strum. Strings run high (top) to low (bottom), tab-style.</p>
+    </div>
+    <div class="tuning">
+      <span class="chip">6 <b>D</b></span>
+      <span class="chip">5 <b>A</b></span>
+      <span class="chip">4 <b>D</b></span>
+      <span class="chip">3 <b>F♯</b></span>
+      <span class="chip">2 <b>A</b></span>
+      <span class="chip">1 <b>D</b></span>
+      <span class="chip audiostate" id="audiostate">tap to wake the strings</span>
+    </div>
+  </header>
+
+  <div class="boardscroll">
+    <div class="board" id="board"></div>
+  </div>
+
+  <p class="rotate-hint">Tip: turn your phone sideways — the whole neck fits in landscape.</p>
+
+  <div class="legend">
+    <div class="key"><span class="swatch sw-open"></span> Open string (fret 0)</div>
+    <div class="key"><span class="swatch sw-root"></span> D — the root note</div>
+    <div class="key"><span class="swatch sw-note"></span> Other notes</div>
+    <div class="key">● = position marker</div>
+  </div>
+
+  <p class="note-foot">
+    <b>Playing it:</b> every pill is a live string — tap to pluck, or sweep down the strings for a strum. Strum all six open and you get a D major chord, just like the real thing.
+    <b>Sharps:</b> shown with ♯ (e.g. F♯). Each sharp is also the flat of the next note (F♯ = G♭) — same fret, two names.
+  </p>
+</div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

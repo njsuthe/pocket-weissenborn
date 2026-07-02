@@ -1,0 +1,15 @@
+{
+  "name": "Pocket Weissenborn",
+  "short_name": "Weissenborn",
+  "description": "A playable Open D fretboard — sketch Weissenborn ideas anywhere.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#1c1612",
+  "theme_color": "#1c1612",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
