@@ -8,7 +8,7 @@ export function buildBoard(el){
     let marker = "";
     if(MARKERS[f] === "single") marker = '<span class="dot"></span>';
     if(MARKERS[f] === "double") marker = '<span class="dot dbl">● ●</span>';
-    html += `<div class="fretnum ${f === 0 ? "open" : ""}">${f === 0 ? "Open" : f}${marker}</div>`;
+    html += `<div class="fretnum ${f === 0 ? "open" : ""}" data-fret="${f}">${f === 0 ? "Open" : f}${marker}</div>`;
   }
 
   STRINGS.forEach((s, si) => {
@@ -35,7 +35,7 @@ export function buildBoard(el){
  * new cell sounds that one too, so sweeping across the strings strums.
  * Each pointer is tracked separately, so multi-touch chords work.
  */
-export function attachPluckInteraction(el, onPluck){
+export function attachPluckInteraction(el, onPluck, isActive = () => true){
   const pointers = new Map(); // pointerId -> {key, t}
 
   const cellAt = (x, y) => {
@@ -55,6 +55,7 @@ export function attachPluckInteraction(el, onPluck){
   };
 
   el.addEventListener("pointerdown", e => {
+    if(!isActive()) return;
     try{ el.setPointerCapture(e.pointerId); }catch(_e){ /* inactive pointer (e.g. synthetic events) */ }
     const st = {key: null, t: 0};
     pointers.set(e.pointerId, st);
@@ -63,6 +64,7 @@ export function attachPluckInteraction(el, onPluck){
   });
 
   el.addEventListener("pointermove", e => {
+    if(!isActive()) return;
     const st = pointers.get(e.pointerId);
     if(!st) return;
     fire(cellAt(e.clientX, e.clientY), st);

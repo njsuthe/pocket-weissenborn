@@ -49,7 +49,7 @@ export class KarplusStrongEngine {
     }catch(_e){ /* non-fatal — audio just obeys the silent switch */ }
   }
 
-  pluck(midi, {velocity = 1} = {}){
+  pluck(midi, {velocity = 1, when = 0} = {}){
     this.unlock();
     const ctx = this.ctx;
     const src = ctx.createBufferSource();
@@ -58,7 +58,7 @@ export class KarplusStrongEngine {
     g.gain.value = Math.min(Math.max(velocity, 0.05), 1);
     src.connect(g);
     g.connect(this.master);
-    src.start();
+    src.start(ctx.currentTime + when);
     src.onended = () => { src.disconnect(); g.disconnect(); };
   }
 

@@ -32,6 +32,24 @@
     </div>
   </header>
 
+  <div class="toolbar">
+    <div class="seg">
+      <button class="segbtn active" data-mode="pluck">Pluck</button>
+      <button class="segbtn" data-mode="bar">Bar</button>
+    </div>
+    <span class="hint" id="barhint" hidden></span>
+    <div class="tools">
+      <select id="scaleroot" class="ctl" title="Scale root"></select>
+      <select id="scaletype" class="ctl" title="Scale"></select>
+      <button id="chordsbtn" class="ctl togglebtn" title="Name the bar chord at every fret">chords</button>
+      <span class="loop">
+        <button id="recbtn" class="ctl togglebtn" title="Record a loop">● rec</button>
+        <button id="playbtn" class="ctl togglebtn" title="Play / stop the loop" disabled>▶</button>
+        <button id="clearbtn" class="ctl" title="Clear the loop" disabled>✕</button>
+      </span>
+    </div>
+  </div>
+
   <div class="boardscroll">
     <div class="board" id="board"></div>
   </div>

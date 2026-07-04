@@ -59,8 +59,28 @@ h1 em{font-style:italic;color:var(--accent);}
 }
 .chip.audiostate.live{color:var(--accent2);border-style:solid;border-color:var(--accent2);}
 
+/* toolbar */
+.toolbar{margin-top:26px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.seg{display:inline-flex;border:1px solid #5a4633;border-radius:999px;overflow:hidden;background:#2a2017;}
+.segbtn{
+  appearance:none;border:0;background:none;color:var(--muted);
+  font-family:'Fraunces',serif;font-weight:600;font-size:14px;
+  padding:7px 18px;cursor:pointer;
+}
+.segbtn.active{background:var(--accent);color:#241208;}
+.hint{font-size:12px;color:var(--muted);}
+.tools{display:flex;gap:8px;align-items:center;margin-left:auto;flex-wrap:wrap;}
+.loop{display:inline-flex;gap:8px;}
+.ctl{
+  appearance:none;background:#2a2017;border:1px solid #5a4633;border-radius:8px;
+  color:var(--ink);font-family:'Spline Sans Mono',monospace;font-size:12px;
+  padding:6px 10px;cursor:pointer;
+}
+.ctl:disabled{opacity:.4;cursor:default;}
+.togglebtn.on{background:var(--accent2);border-color:#2c5f5a;color:#eafaf7;}
+
 /* fretboard */
-.boardscroll{overflow-x:auto;padding-bottom:8px;margin-top:34px;}
+.boardscroll{overflow-x:auto;padding-bottom:8px;margin-top:16px;}
 .board{
   display:grid;
   grid-template-columns:max-content repeat(var(--frets,13),minmax(34px,1fr));
@@ -88,6 +108,11 @@ h1 em{font-style:italic;color:var(--accent);}
   width:auto;height:auto;background:none;color:var(--accent);
   font-size:10px;letter-spacing:2px;margin-top:5px;
 }
+.chordname{
+  display:none;font-family:'Fraunces',serif;font-weight:600;
+  font-size:12px;color:var(--accent);margin-top:3px;
+}
+.board.show-chords .chordname{display:block;}
 
 /* string label column */
 .strlabel{
@@ -136,6 +161,20 @@ h1 em{font-style:italic;color:var(--accent);}
   background:var(--accent2);color:#eafaf7;border-color:#2c5f5a;
   font-weight:600;box-shadow:0 2px 10px #3f7d7755;
 }
+/* scale highlighting */
+.cell.out .pill{opacity:.22;box-shadow:none;}
+.cell.scaleroot .pill{outline:2px solid var(--accent);outline-offset:1px;}
+
+/* the steel bar (bar mode) */
+.bar{
+  grid-row:2 / span 6;
+  justify-self:center;
+  width:13px;margin:6px 0;border-radius:7px;
+  background:linear-gradient(90deg,#7d848b,#eef2f6 45%,#aab2ba 75%,#666d74);
+  box-shadow:0 3px 12px #000c, inset 0 1px 0 #ffffffaa;
+  opacity:.93;z-index:3;pointer-events:none;
+}
+
 .pill.ring{animation:ring .38s cubic-bezier(.22,1,.36,1);}
 @keyframes ring{
   0%{transform:scale(1.3);box-shadow:0 0 24px #ffd9a0cc,0 2px 6px #00000040;}
@@ -173,9 +212,14 @@ h1 em{font-style:italic;color:var(--accent);}
   h1{font-size:24px;line-height:1;}
   .tuning{margin-top:0;}
   .tuning .chip:not(.audiostate){display:none;}
+  .toolbar{margin-top:0;gap:8px;}
+  .segbtn{padding:5px 12px;font-size:12px;}
+  .ctl{padding:4px 8px;font-size:11px;}
+  .hint{display:none;}
+  .chordname{font-size:10px;margin-top:1px;}
   .boardscroll{margin-top:4px;padding-bottom:0;}
   .board{min-width:0;}
-  .cell{height:clamp(38px,calc((100dvh - 120px)/6),52px);}
+  .cell{height:clamp(36px,calc((100dvh - 150px)/6),52px);}
   .pill{min-width:28px;height:28px;font-size:12px;padding:0 5px;}
   .fretnum{padding:8px 0 6px;font-size:10px;}
   .fretnum .dot{width:5px;height:5px;margin-top:4px;}

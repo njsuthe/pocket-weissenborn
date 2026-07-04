@@ -24,7 +24,9 @@ Releases are picked up by clients via the service worker: bump `VERSION` in
 
 - [x] Playable fretboard (tap to pluck, drag to strum, multi-touch)
 - [x] PWA install + offline
-- [ ] Bar + strum mode (virtual steel bar)
-- [ ] Scale/key highlighting
-- [ ] Chord position guide
-- [ ] Looper / idea recorder
+- [x] Bar + strum mode (virtual steel bar: tap a fret to place, swipe to strum)
+- [x] Scale/key highlighting (root + scale pickers)
+- [x] Chord position guide (bar-chord names on every fret)
+- [x] Looper / idea recorder (event-based, with overdub)
+- [ ] Sample-based engine (self-recorded Weissenborn notes)
+- [ ] Slide/glide gesture (continuous pitch between frets)

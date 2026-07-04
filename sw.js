@@ -1,6 +1,6 @@
 // Bump VERSION on every release — the activate step drops old caches,
 // which is how clients pick up new files (fetch is cache-first).
-const VERSION = "pw-v1";
+const VERSION = "pw-v2";
 
 const CORE = [
   "./",
@@ -10,6 +10,10 @@ const CORE = [
   "js/notes.js",
   "js/engine.js",
   "js/fretboard.js",
+  "js/bar.js",
+  "js/scales.js",
+  "js/chords.js",
+  "js/looper.js",
   "manifest.webmanifest",
   "icons/icon-192.png",
   "icons/icon-512.png",
