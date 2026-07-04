@@ -82,6 +82,7 @@ h1 em{font-style:italic;color:var(--accent);}
 /* fretboard */
 .boardscroll{overflow-x:auto;padding-bottom:8px;margin-top:16px;}
 .board{
+  position:relative;
   display:grid;
   grid-template-columns:max-content repeat(var(--frets,13),minmax(34px,1fr));
   width:100%;min-width:880px;
@@ -165,11 +166,13 @@ h1 em{font-style:italic;color:var(--accent);}
 .cell.out .pill{opacity:.22;box-shadow:none;}
 .cell.scaleroot .pill{outline:2px solid var(--accent);outline-offset:1px;}
 
-/* the steel bar (bar mode) */
+/* the steel bar (bar mode) — absolutely positioned so it overlays its
+   grid column without displacing the cells' auto-placement */
 .bar{
-  grid-row:2 / span 6;
-  justify-self:center;
-  width:13px;margin:6px 0;border-radius:7px;
+  position:absolute;
+  grid-row:2 / 8;
+  top:6px;bottom:6px;left:50%;transform:translateX(-50%);
+  width:13px;border-radius:7px;
   background:linear-gradient(90deg,#7d848b,#eef2f6 45%,#aab2ba 75%,#666d74);
   box-shadow:0 3px 12px #000c, inset 0 1px 0 #ffffffaa;
   opacity:.93;z-index:3;pointer-events:none;

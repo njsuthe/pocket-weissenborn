@@ -1,6 +1,6 @@
 // Bump VERSION on every release — the activate step drops old caches,
 // which is how clients pick up new files (fetch is cache-first).
-const VERSION = "pw-v2";
+const VERSION = "pw-v3";
 
 const CORE = [
   "./",

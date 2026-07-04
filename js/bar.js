@@ -19,7 +19,7 @@ export function attachBarMode(board, {isActive, onStrum, onBarMove}){
       bar.style.display = "none";
     }else{
       bar.style.display = "";
-      bar.style.gridColumn = String(f + 2); // col 1 = labels, col 2 = open
+      bar.style.gridColumn = `${f + 2} / ${f + 3}`; // col 1 = labels, col 2 = open
     }
     onBarMove?.(fret);
   };

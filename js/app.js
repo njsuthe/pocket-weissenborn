@@ -120,7 +120,9 @@ window.addEventListener("pointerdown", () => {
   tick();
 }, {capture: true});
 
-if("serviceWorker" in navigator){
+// cache-first SW would serve stale files during local dev — only register in production
+const isLocal = ["localhost", "127.0.0.1"].includes(location.hostname);
+if("serviceWorker" in navigator && !isLocal){
   window.addEventListener("load", () => navigator.serviceWorker.register("sw.js"));
 }
 
