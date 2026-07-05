@@ -1,7 +1,9 @@
-import { STRINGS, FRETS, MARKERS, noteAt, pretty } from "./notes.js";
+import { STRINGS, FRETS, MARKERS, CHROMATIC, midiAt, pretty } from "./notes.js";
+import { currentRootPc } from "./chords.js";
 
 export function buildBoard(el){
   el.style.setProperty("--frets", FRETS + 1);
+  const rootPc = currentRootPc();
 
   let html = '<div class="corner"></div>';
   for(let f = 0; f <= FRETS; f++){
@@ -14,8 +16,9 @@ export function buildBoard(el){
   STRINGS.forEach((s, si) => {
     html += `<div class="strlabel"><span class="open">${pretty(s.open)}</span> <span class="num">str ${s.n}</span></div>`;
     for(let f = 0; f <= FRETS; f++){
-      const note = noteAt(s.open, f);
-      const isRoot = note === "D";
+      const midi = midiAt(s, f);
+      const note = CHROMATIC[midi % 12];
+      const isRoot = midi % 12 === rootPc;
       const isSharp = note.includes("#");
       let cls = "pill";
       if(f === 0) cls += " openpill";
@@ -31,35 +34,45 @@ export function buildBoard(el){
 }
 
 /*
- * Pluck mode: pointerdown sounds the cell under the finger; dragging into a
- * new cell sounds that one too, so sweeping across the strings strums.
- * Each pointer is tracked separately, so multi-touch chords work.
+ * Pluck mode: pointerdown sounds the cell under the finger. Dragging
+ * vertically onto another string plucks it (finger strums); dragging
+ * horizontally along the same string GLIDES the ringing note — fractional
+ * frets and all, like moving the steel. Release soft-snaps to the nearest
+ * fret. Each pointer is tracked separately, so multi-touch chords work.
  */
-export function attachPluckInteraction(el, onPluck, isActive = () => true){
-  const pointers = new Map(); // pointerId -> {key, t}
+export function attachPluckInteraction(el, {onPluck, onGlide, isActive = () => true}){
+  const pointers = new Map(); // pointerId -> slide state
 
   const cellAt = (x, y) => {
     const t = document.elementFromPoint(x, y);
     return t ? t.closest(".cell") : null;
   };
 
-  const fire = (cell, st) => {
-    if(!cell) return;
-    const key = cell.dataset.string + ":" + cell.dataset.fret;
-    const now = performance.now();
-    if(st.key === key) return;
-    if(now - st.t < 25) return; // no machine-gunning on cell boundaries
-    st.key = key;
-    st.t = now;
-    onPluck(+cell.dataset.string, +cell.dataset.fret, cell);
+  const setTarget = (st, cell) => {
+    if(st.target === cell) return;
+    st.target?.classList.remove("slide-target");
+    st.target = cell;
+    cell?.classList.add("slide-target");
+  };
+
+  const begin = (st, cell) => {
+    const r = cell.getBoundingClientRect();
+    st.si = +cell.dataset.string;
+    st.baseFret = +cell.dataset.fret;
+    st.cellW = r.width;
+    st.originX = r.left + r.width / 2;
+    st.semis = 0;
+    st.voice = onPluck(st.si, st.baseFret, cell) ?? null;
+    setTarget(st, cell);
   };
 
   el.addEventListener("pointerdown", e => {
     if(!isActive()) return;
     try{ el.setPointerCapture(e.pointerId); }catch(_e){ /* inactive pointer (e.g. synthetic events) */ }
-    const st = {key: null, t: 0};
+    const st = {};
     pointers.set(e.pointerId, st);
-    fire(e.target.closest?.(".cell"), st);
+    const cell = e.target.closest?.(".cell");
+    if(cell) begin(st, cell);
     e.preventDefault();
   });
 
@@ -67,10 +80,30 @@ export function attachPluckInteraction(el, onPluck, isActive = () => true){
     if(!isActive()) return;
     const st = pointers.get(e.pointerId);
     if(!st) return;
-    fire(cellAt(e.clientX, e.clientY), st);
+    const cell = cellAt(e.clientX, e.clientY);
+    if(!cell) return;
+    if(st.si === undefined || +cell.dataset.string !== st.si){
+      begin(st, cell); // first cell reached, or crossed strings: pluck (strum)
+    }else if(st.voice){
+      const raw = (e.clientX - st.originX) / st.cellW; // cell width = one semitone
+      st.semis = Math.min(Math.max(raw, -st.baseFret), FRETS - st.baseFret);
+      st.voice.bend(st.semis);
+      onGlide?.(st.voice, st.semis, false);
+      setTarget(st, cell);
+    }
   });
 
-  const end = e => pointers.delete(e.pointerId);
+  const end = e => {
+    const st = pointers.get(e.pointerId);
+    pointers.delete(e.pointerId);
+    if(!st) return;
+    setTarget(st, null);
+    if(st.voice && st.semis){
+      const snapped = Math.round(st.semis); // land in tune
+      st.voice.bend(snapped, {tau: 0.05});
+      onGlide?.(st.voice, snapped, true);
+    }
+  };
   el.addEventListener("pointerup", end);
   el.addEventListener("pointercancel", end);
   el.addEventListener("contextmenu", e => e.preventDefault());

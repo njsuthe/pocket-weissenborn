@@ -1,16 +1,15 @@
-import { CHROMATIC, STRINGS, FRETS, midiAt, noteAt, pretty } from "./notes.js";
+import { CHROMATIC, STRINGS, FRETS, midiAt, pretty } from "./notes.js";
 import { KarplusStrongEngine } from "./engine.js";
 import { buildBoard, attachPluckInteraction } from "./fretboard.js";
 import { attachBarMode } from "./bar.js";
 import { SCALES, applyScale } from "./scales.js";
-import { attachChordLabels } from "./chords.js";
+import { attachChordLabels, barChordName, currentRootPc } from "./chords.js";
 import { Looper } from "./looper.js";
+import { initTuning } from "./tuning.js";
 
 const engine = new KarplusStrongEngine();
 const board = document.getElementById("board");
 const audioChip = document.getElementById("audiostate");
-
-buildBoard(board);
 
 const flash = (si, fret) => {
   const pill = board.querySelector(`.cell[data-string="${si}"][data-fret="${fret}"] .pill`);
@@ -48,21 +47,31 @@ clearBtn.addEventListener("click", () => looper.clear());
 
 // --- one gate for every note: audio + pill flash + loop capture ---
 function sound(si, fret, velocity = 1, when = 0, fromLoop = false){
-  engine.pluck(midiAt(STRINGS[si], fret), {velocity, when});
+  const voice = engine.pluck(midiAt(STRINGS[si], fret), {velocity, when});
   if(when * 1000 < 20) flash(si, fret);
   else setTimeout(() => flash(si, fret), when * 1000);
-  if(!fromLoop) looper.capture(si, fret, velocity);
+  voice.evId = fromLoop ? null : looper.capture(si, fret, velocity);
+  return voice;
+}
+// …and one gate for every slide, so loops capture those too
+function glide(voice, semis, final){
+  looper.captureGlide(voice?.evId, semis, final);
 }
 
 // --- playing modes ---
 let mode = "pluck";
 
-attachPluckInteraction(board, (si, fret) => sound(si, fret), () => mode === "pluck");
+attachPluckInteraction(board, {
+  isActive: () => mode === "pluck",
+  onPluck: (si, fret) => sound(si, fret),
+  onGlide: glide,
+});
 
 const barhint = document.getElementById("barhint");
 const barCtl = attachBarMode(board, {
   isActive: () => mode === "bar",
   onStrum: (si, fret, velocity, delay) => sound(si, fret, velocity, delay),
+  onGlide: glide,
   onBarMove: () => updateBarHint(),
 });
 
@@ -71,8 +80,8 @@ function updateBarHint(){
   if(mode !== "bar") return;
   const f = barCtl.fret;
   barhint.textContent = f === 0
-    ? "open — D major · tap a fret to set the bar"
-    : `bar @ ${f} — ${pretty(noteAt("D", f))} major · swipe the strings to strum`;
+    ? `open — ${barChordName(0)} · tap a fret to set the bar`
+    : `bar @ ${f} — ${barChordName(f)} · swipe to strum, drag to slide`;
 }
 
 document.querySelectorAll(".segbtn").forEach(b => {
@@ -95,19 +104,52 @@ rootSel.addEventListener("change", reScale);
 typeSel.addEventListener("change", reScale);
 
 // --- chord labels on fret headers ---
-attachChordLabels(board, document.getElementById("chordsbtn"));
+const chordCtl = attachChordLabels(board, document.getElementById("chordsbtn"));
+const legendRoot = document.getElementById("legendroot");
+
+// --- tuning: everything below derives from it, rebuilt on change ---
+function warmAll(){
+  const all = new Set();
+  STRINGS.forEach(s => { for(let f = 0; f <= FRETS; f++) all.add(midiAt(s, f)); });
+  engine.warm([...all]);
+}
+
+function retune(){
+  buildBoard(board);
+  barCtl.mount();               // buildBoard wiped the bar element
+  barCtl.setFret(barCtl.fret);
+  chordCtl.relabel();
+  reScale();
+  updateBarHint();
+  legendRoot.textContent = `${pretty(CHROMATIC[currentRootPc()])} — the root note`;
+  warmAll();
+}
+
+initTuning({
+  select: document.getElementById("tuningsel"),
+  panelBtn: document.getElementById("tunebtn"),
+  panel: document.getElementById("tunepanel"),
+  chips: document.getElementById("tuningchips"),
+  onChange: retune, // fires once at init → first board build
+});
+
+// --- compact play layout: real landscape, or portrait rotated 90° by CSS ---
+const compactQs = [
+  matchMedia("(max-height: 560px)"),
+  matchMedia("(orientation: portrait) and (max-width: 760px)"),
+];
+const setCompact = () =>
+  document.body.classList.toggle("compact", compactQs.some(q => q.matches));
+compactQs.forEach(q => q.addEventListener("change", setCompact));
+setCompact();
 
 // --- audio unlock + buffer warm on first interaction ---
-let warmed = false;
 window.addEventListener("pointerdown", () => {
+  // real orientation lock where supported (Android standalone); no-op on iOS
+  try{ screen.orientation?.lock?.("landscape")?.catch(() => {}); }catch(_e){}
   if(engine.running) return;
   engine.unlock();
-  if(!warmed){
-    warmed = true;
-    const all = new Set();
-    STRINGS.forEach(s => { for(let f = 0; f <= FRETS; f++) all.add(midiAt(s, f)); });
-    engine.warm([...all]);
-  }
+  warmAll();
   let tries = 0;
   const tick = () => {
     if(engine.running){
@@ -126,4 +168,4 @@ if("serviceWorker" in navigator && !isLocal){
   window.addEventListener("load", () => navigator.serviceWorker.register("sw.js"));
 }
 
-window.__pw = { engine, looper }; // console handle for on-device debugging
+window.__pw = { engine, looper, barCtl }; // console handle for on-device debugging

@@ -49,6 +49,8 @@ export class KarplusStrongEngine {
     }catch(_e){ /* non-fatal — audio just obeys the silent switch */ }
   }
 
+  // Returns a voice handle so gestures can keep bending the ringing note:
+  // bend(semis) re-pitches via playbackRate — physically what a bar slide is.
   pluck(midi, {velocity = 1, when = 0} = {}){
     this.unlock();
     const ctx = this.ctx;
@@ -59,7 +61,17 @@ export class KarplusStrongEngine {
     src.connect(g);
     g.connect(this.master);
     src.start(ctx.currentTime + when);
-    src.onended = () => { src.disconnect(); g.disconnect(); };
+    const voice = {
+      midi,
+      live: true,
+      bend(semis, {tau = 0.03, when: at = 0} = {}){
+        if(!voice.live) return;
+        src.playbackRate.setTargetAtTime(Math.pow(2, semis / 12), ctx.currentTime + at, tau);
+      },
+      stop(){ try{ src.stop(); }catch(_e){} },
+    };
+    src.onended = () => { voice.live = false; src.disconnect(); g.disconnect(); };
+    return voice;
   }
 
   // Pre-render buffers in the background so the first press of each note

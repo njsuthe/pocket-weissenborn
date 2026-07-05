@@ -17,6 +17,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 
 body{
+  --appH:100dvh; /* the "vertical" span of the app — swapped in rotated portrait */
   background:
     radial-gradient(1200px 600px at 70% -10%, #2a201780 0%, transparent 60%),
     var(--bg);
@@ -46,6 +47,7 @@ h1 em{font-style:italic;color:var(--accent);}
 .tuning{
   margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;
 }
+#tuningchips{display:contents;}
 .chip{
   font-family:'Fraunces',serif;font-weight:600;
   border:1px solid #5a4633;border-radius:999px;
@@ -78,6 +80,13 @@ h1 em{font-style:italic;color:var(--accent);}
 }
 .ctl:disabled{opacity:.4;cursor:default;}
 .togglebtn.on{background:var(--accent2);border-color:#2c5f5a;color:#eafaf7;}
+
+/* per-string tuning panel */
+.tunepanel{margin-top:10px;display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
+.tunepanel[hidden]{display:none;}
+.tstr{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:12px;}
+.tstr b{color:var(--ink);font-size:13px;min-width:34px;text-align:center;}
+.tstr .ctl{padding:2px 9px;}
 
 /* fretboard */
 .boardscroll{overflow-x:auto;padding-bottom:8px;margin-top:16px;}
@@ -165,6 +174,8 @@ h1 em{font-style:italic;color:var(--accent);}
 /* scale highlighting */
 .cell.out .pill{opacity:.22;box-shadow:none;}
 .cell.scaleroot .pill{outline:2px solid var(--accent);outline-offset:1px;}
+/* where a sliding finger currently sits */
+.cell.slide-target .pill{box-shadow:0 0 16px #ffd9a0aa;}
 
 /* the steel bar (bar mode) — absolutely positioned so it overlays its
    grid column without displacing the cells' auto-placement */
@@ -177,6 +188,7 @@ h1 em{font-style:italic;color:var(--accent);}
   box-shadow:0 3px 12px #000c, inset 0 1px 0 #ffffffaa;
   opacity:.93;z-index:3;pointer-events:none;
 }
+.board:not(.barmode) .bar{display:none;}
 
 .pill.ring{animation:ring .38s cubic-bezier(.22,1,.36,1);}
 @keyframes ring{
@@ -207,37 +219,44 @@ h1 em{font-style:italic;color:var(--accent);}
 }
 .note-foot b{color:var(--ink);}
 
-/* compact landscape (phone on its side) — the playing layout */
-@media (max-height:560px){
-  body{padding:10px 14px calc(12px + env(safe-area-inset-bottom));}
-  header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:8px;}
-  .eyebrow,.sub,.legend,.note-foot,.rotate-hint{display:none;}
-  h1{font-size:24px;line-height:1;}
-  .tuning{margin-top:0;}
-  .tuning .chip:not(.audiostate){display:none;}
-  .toolbar{margin-top:0;gap:8px;}
-  .segbtn{padding:5px 12px;font-size:12px;}
-  .ctl{padding:4px 8px;font-size:11px;}
-  .hint{display:none;}
-  .chordname{font-size:10px;margin-top:1px;}
-  .boardscroll{margin-top:4px;padding-bottom:0;}
-  .board{min-width:0;}
-  .cell{height:clamp(36px,calc((100dvh - 150px)/6),52px);}
-  .pill{min-width:28px;height:28px;font-size:12px;padding:0 5px;}
-  .fretnum{padding:8px 0 6px;font-size:10px;}
-  .fretnum .dot{width:5px;height:5px;margin-top:4px;}
-  .strlabel{padding:0 8px 0 10px;}
-  .strlabel .open{font-size:15px;}
-  .strlabel .num{display:none;}
-}
+/* compact play layout — applied by JS (body.compact) in real landscape
+   (max-height 560px) AND in rotated portrait, which media queries can't see */
+body.compact{padding:10px 14px calc(12px + env(safe-area-inset-bottom));}
+body.compact header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:8px;}
+body.compact .eyebrow,
+body.compact .sub,
+body.compact .legend,
+body.compact .note-foot{display:none;}
+body.compact h1{font-size:24px;line-height:1;}
+body.compact .tuning{margin-top:0;}
+body.compact .tuning .chip:not(.audiostate){display:none;}
+body.compact .toolbar{margin-top:0;gap:8px;}
+body.compact .segbtn{padding:5px 12px;font-size:12px;}
+body.compact .ctl{padding:4px 8px;font-size:11px;}
+body.compact .hint{display:none;}
+body.compact .tunepanel{margin-top:6px;gap:10px;}
+body.compact .chordname{font-size:10px;margin-top:1px;}
+body.compact .boardscroll{margin-top:4px;padding-bottom:0;}
+body.compact .board{min-width:0;}
+body.compact .cell{height:clamp(36px,calc((var(--appH) - 150px)/6),52px);}
+body.compact .pill{min-width:28px;height:28px;font-size:12px;padding:0 5px;}
+body.compact .fretnum{padding:8px 0 6px;font-size:10px;}
+body.compact .fretnum .dot{width:5px;height:5px;margin-top:4px;}
+body.compact .strlabel{padding:0 8px 0 10px;}
+body.compact .strlabel .open{font-size:15px;}
+body.compact .strlabel .num{display:none;}
 
-/* portrait phones: board scrolls sideways, nudge toward landscape */
+/* portrait phones: render the whole app rotated 90° so it's always playable
+   sideways, even with the phone's rotation lock on */
 @media (orientation:portrait) and (max-width:760px){
-  body{padding:24px 16px 40px;}
-  .rotate-hint{
-    display:block;margin-top:12px;padding:10px 14px;
-    border:1px dashed #5a4633;border-radius:10px;
-    color:var(--muted);font-size:12.5px;line-height:1.5;
+  body{--appH:100dvw;padding:0;overflow:hidden;}
+  .wrap{
+    position:fixed;top:0;left:0;
+    width:100dvh;height:100dvw;
+    transform:rotate(90deg) translateY(-100dvw);
+    transform-origin:top left;
+    max-width:none;
+    padding:10px 14px;
+    overflow:hidden;
   }
-  .board{touch-action:pan-x;} /* horizontal drag scrolls the neck; taps still pluck */
 }

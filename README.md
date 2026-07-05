@@ -26,7 +26,9 @@ Releases are picked up by clients via the service worker: bump `VERSION` in
 - [x] PWA install + offline
 - [x] Bar + strum mode (virtual steel bar: tap a fret to place, swipe to strum)
 - [x] Scale/key highlighting (root + scale pickers)
-- [x] Chord position guide (bar-chord names on every fret)
-- [x] Looper / idea recorder (event-based, with overdub)
+- [x] Chord position guide (bar-chord names on every fret, any tuning)
+- [x] Looper / idea recorder (event-based, with overdub — slides included)
+- [x] Slide/glide (drag along a string; drag the steel and the chord glides)
+- [x] Tunings: presets (Open D/Dm/Dmaj7/G/C/C6) + per-string steppers, persisted
+- [x] Portrait phones render rotated — always playable sideways
 - [ ] Sample-based engine (self-recorded Weissenborn notes)
-- [ ] Slide/glide gesture (continuous pitch between frets)

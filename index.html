@@ -17,17 +17,12 @@
 <div class="wrap">
   <header>
     <div>
-      <div class="eyebrow">Lap Steel · Slide · Open D</div>
+      <div class="eyebrow">Lap Steel · Slide · Weissenborn</div>
       <h1>Pocket <em>Weissenborn</em></h1>
-      <p class="sub">A playable Open D fretboard. Tap any fret to pluck the note — sweep a finger across the strings to strum. Strings run high (top) to low (bottom), tab-style.</p>
+      <p class="sub">A playable lap-steel fretboard. Tap any fret to pluck — sweep across the strings to strum — drag along a string to slide. Strings run high (top) to low (bottom), tab-style.</p>
     </div>
     <div class="tuning">
-      <span class="chip">6 <b>D</b></span>
-      <span class="chip">5 <b>A</b></span>
-      <span class="chip">4 <b>D</b></span>
-      <span class="chip">3 <b>F♯</b></span>
-      <span class="chip">2 <b>A</b></span>
-      <span class="chip">1 <b>D</b></span>
+      <span id="tuningchips"></span>
       <span class="chip audiostate" id="audiostate">tap to wake the strings</span>
     </div>
   </header>
@@ -39,6 +34,8 @@
     </div>
     <span class="hint" id="barhint" hidden></span>
     <div class="tools">
+      <select id="tuningsel" class="ctl" title="Tuning preset"></select>
+      <button id="tunebtn" class="ctl togglebtn" title="Tune strings individually">tune</button>
       <select id="scaleroot" class="ctl" title="Scale root"></select>
       <select id="scaletype" class="ctl" title="Scale"></select>
       <button id="chordsbtn" class="ctl togglebtn" title="Name the bar chord at every fret">chords</button>
@@ -50,21 +47,21 @@
     </div>
   </div>
 
+  <div class="tunepanel" id="tunepanel" hidden></div>
+
   <div class="boardscroll">
     <div class="board" id="board"></div>
   </div>
 
-  <p class="rotate-hint">Tip: turn your phone sideways — the whole neck fits in landscape.</p>
-
   <div class="legend">
     <div class="key"><span class="swatch sw-open"></span> Open string (fret 0)</div>
-    <div class="key"><span class="swatch sw-root"></span> D — the root note</div>
+    <div class="key"><span class="swatch sw-root"></span> <span id="legendroot">D — the root note</span></div>
     <div class="key"><span class="swatch sw-note"></span> Other notes</div>
     <div class="key">● = position marker</div>
   </div>
 
   <p class="note-foot">
-    <b>Playing it:</b> every pill is a live string — tap to pluck, or sweep down the strings for a strum. Strum all six open and you get a D major chord, just like the real thing.
+    <b>Playing it:</b> every pill is a live string — tap to pluck, sweep down the strings to strum, drag along a string to slide (release lands on the nearest fret). In Bar mode, drag the steel and the whole ringing chord glides with it.
     <b>Sharps:</b> shown with ♯ (e.g. F♯). Each sharp is also the flat of the next note (F♯ = G♭) — same fret, two names.
   </p>
 </div>
