@@ -93,7 +93,7 @@ h1 em{font-style:italic;color:var(--accent);}
 .board{
   position:relative;
   display:grid;
-  grid-template-columns:max-content repeat(var(--frets,13),minmax(34px,1fr));
+  grid-template-columns:var(--gutter,72px) repeat(var(--frets,13),minmax(34px,1fr));
   width:100%;min-width:880px;
   background:linear-gradient(180deg,var(--board),var(--board2));
   border-radius:10px;
@@ -124,18 +124,6 @@ h1 em{font-style:italic;color:var(--accent);}
 }
 .board.show-chords .chordname{display:block;}
 
-/* string label column */
-.strlabel{
-  display:flex;align-items:center;justify-content:flex-end;gap:7px;
-  padding:0 16px 0 18px;white-space:nowrap;
-  background:#241a11;border-right:2px solid var(--wire);
-}
-.strlabel .num{color:var(--muted);font-size:11px;}
-.strlabel .open{
-  font-family:'Fraunces',serif;font-size:20px;font-weight:900;
-  color:var(--accent);line-height:1;
-}
-
 /* note cells */
 .cell{
   position:relative;height:52px;
@@ -151,6 +139,9 @@ h1 em{font-style:italic;color:var(--accent);}
   opacity:.55;
 }
 .cell.open-col{background:#00000022;}
+
+/* blank left gutter — same footprint the string labels used to have */
+.gutter{background:#241a11;border-right:2px solid var(--wire);}
 
 .pill{
   position:relative;z-index:2;display:inline-flex;
@@ -222,6 +213,7 @@ h1 em{font-style:italic;color:var(--accent);}
 /* compact play layout — applied by JS (body.compact) in real landscape
    (max-height 560px) AND in rotated portrait, which media queries can't see */
 body.compact{padding:10px 14px calc(12px + env(safe-area-inset-bottom));}
+body.compact .board{--gutter:46px;} /* sized to sit under the camera island */
 body.compact header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:8px;}
 body.compact .eyebrow,
 body.compact .sub,
@@ -242,9 +234,6 @@ body.compact .cell{height:clamp(36px,calc((var(--appH) - 150px)/6),52px);}
 body.compact .pill{min-width:28px;height:28px;font-size:12px;padding:0 5px;}
 body.compact .fretnum{padding:8px 0 6px;font-size:10px;}
 body.compact .fretnum .dot{width:5px;height:5px;margin-top:4px;}
-body.compact .strlabel{padding:0 8px 0 10px;}
-body.compact .strlabel .open{font-size:15px;}
-body.compact .strlabel .num{display:none;}
 
 /* portrait phones: render the whole app rotated 90° so it's always playable
    sideways, even with the phone's rotation lock on */

@@ -5,6 +5,8 @@ export function buildBoard(el){
   el.style.setProperty("--frets", FRETS + 1);
   const rootPc = currentRootPc();
 
+  // the left gutter is intentionally blank: it keeps the frets where they
+  // were and gives the phone's camera island somewhere to sit
   let html = '<div class="corner"></div>';
   for(let f = 0; f <= FRETS; f++){
     let marker = "";
@@ -14,7 +16,7 @@ export function buildBoard(el){
   }
 
   STRINGS.forEach((s, si) => {
-    html += `<div class="strlabel"><span class="open">${pretty(s.open)}</span> <span class="num">str ${s.n}</span></div>`;
+    html += '<div class="gutter"></div>';
     for(let f = 0; f <= FRETS; f++){
       const midi = midiAt(s, f);
       const note = CHROMATIC[midi % 12];
