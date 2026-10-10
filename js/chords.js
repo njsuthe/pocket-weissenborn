@@ -14,6 +14,7 @@ const QUALITIES = [
   {suffix: "m7",   pcs: [0, 3, 7, 10]},
   {suffix: "6",    pcs: [0, 4, 7, 9]},
   {suffix: "m6",   pcs: [0, 3, 7, 9]},
+  {suffix: "add9", pcs: [0, 2, 4, 7]},
   {suffix: "sus4", pcs: [0, 5, 7]},
   {suffix: "sus2", pcs: [0, 2, 7]},
   {suffix: "5",    pcs: [0, 7]},

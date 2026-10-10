@@ -10,6 +10,7 @@ export const TUNINGS = {
   "Open D maj7":  [38, 45, 50, 54, 57, 61], // D A D F# A C#
   "Open G":       [38, 43, 50, 55, 59, 62], // D G D G B D (taro patch)
   "Open C":       [36, 43, 48, 55, 60, 64], // C G C G C E
+  "Open Cadd9":   [36, 43, 50, 52, 55, 62], // C G D E G D
   "C6":           [48, 52, 55, 57, 60, 64], // C E G A C E
 };
 
