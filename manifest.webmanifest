@@ -1,7 +1,7 @@
 {
   "name": "Pocket Weissenborn",
   "short_name": "Weissenborn",
-  "description": "A playable Open D fretboard — sketch Weissenborn ideas anywhere.",
+  "description": "A playable Weissenborn fretboard — sketch song ideas anywhere.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
