@@ -51,6 +51,7 @@ export function initTuning({select, panelBtn, panel, chips, onChange}){
   panelBtn.addEventListener("click", () => {
     panel.hidden = !panel.hidden;
     panelBtn.classList.toggle("on", !panel.hidden);
+    document.body.classList.toggle("tuneopen", !panel.hidden);
   });
 
   panel.addEventListener("click", e => {

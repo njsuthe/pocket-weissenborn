@@ -26,7 +26,16 @@ body{
   padding:48px 28px 64px;
   min-height:100vh;
   touch-action:manipulation;
+  /* it's an instrument, not a document: nothing here should highlight */
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
+  -webkit-tap-highlight-color:transparent;
 }
+
+/* play layouts: lock the screen so a stray drag can't pull the page around */
+html.compact,html.compact body{
+  height:100%;overflow:hidden;overscroll-behavior:none;touch-action:none;
+}
+body.compact{position:fixed;inset:0;width:100%;min-height:0;}
 
 .wrap{max-width:1180px;margin:0 auto;}
 
@@ -252,6 +261,8 @@ body.compact .chordname{font-size:10px;margin-top:1px;}
 body.compact .boardscroll{margin-top:4px;padding-bottom:0;}
 body.compact .board{min-width:0;}
 body.compact .cell{height:clamp(36px,calc((var(--appH) - 150px)/6),52px);}
+/* tune panel adds a row — trim the board so it all stays on screen */
+body.compact.tuneopen .cell{height:clamp(30px,calc((var(--appH) - 190px)/6),52px);}
 body.compact .pill{min-width:28px;height:28px;font-size:12px;padding:0 5px;}
 body.compact .fretnum{padding:8px 0 6px;font-size:10px;}
 body.compact .fretnum .dot{width:5px;height:5px;margin-top:4px;}

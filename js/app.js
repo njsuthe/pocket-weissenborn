@@ -152,10 +152,16 @@ const compactQs = [
   matchMedia("(max-height: 560px)"),
   matchMedia("(orientation: portrait) and (max-width: 760px)"),
 ];
-const setCompact = () =>
-  document.body.classList.toggle("compact", compactQs.some(q => q.matches));
+const setCompact = () => {
+  const on = compactQs.some(q => q.matches);
+  document.body.classList.toggle("compact", on);
+  document.documentElement.classList.toggle("compact", on); // html needs it too, to lock scrolling
+};
 compactQs.forEach(q => q.addEventListener("change", setCompact));
 setCompact();
+
+// iOS Safari ignores user-scalable=no for pinch — stop it here
+document.addEventListener("gesturestart", e => e.preventDefault());
 
 // --- audio unlock + buffer warm on first interaction ---
 window.addEventListener("pointerdown", () => {
