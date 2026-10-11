@@ -19,9 +19,15 @@ Once installed it runs full-screen and works offline.
 - **Play it three ways:** tap a fret to pluck, sweep across the strings to
   strum, or drag along a string to **slide**. The pitch glides continuously and
   lands on the nearest fret when you let go. Multi-touch chords work.
-- **Bar mode:** a virtual steel bar across the strings. Tap a fret to place it,
-  swipe the strings to strum the barred chord, and drag it sideways to slide the
-  whole ringing chord. It snaps to the nearest fret on release.
+- **Bar mode:** a virtual steel bar. Tap a fret to place it, then grab it
+  anywhere and drag. Sideways slides the whole ringing chord (it snaps to the
+  nearest fret on release). Up or down moves it over the strings, and the part
+  that would hang off the fretboard is cut away, so the bar can cover just the
+  low strings or just the high ones while the rest ring open.
+- **Strum lane:** the strip of pads down the right edge strums with a second
+  finger, so one thumb can slide the bar while the other strums. In Pluck mode
+  it plays the open strings. In Bar mode the strings under the bar play fretted
+  and glide with it, and the rest play open.
 - **Tunings:** Open D, Open D minor, Open D maj7, Open G, Open C, Open Cadd9 and
   C6. The **tune** button lets you step each string up or down a semitone. Your
   tuning is saved on the device.
@@ -78,6 +84,6 @@ development never serves stale files.
 - [x] Scale highlighting and per-fret chord labels
 - [x] Looper with overdub (slides included)
 - [x] Landscape-first layout
-- [ ] Strum lane for the right thumb, and a bar that covers only some strings
+- [x] Strum lane for the right thumb, and a bar that covers only some strings
 - [ ] Sample-based engine (self-recorded Weissenborn notes)
 - [ ] Custom domain

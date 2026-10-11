@@ -2,6 +2,7 @@ import { CHROMATIC, STRINGS, FRETS, midiAt, pretty } from "./notes.js";
 import { KarplusStrongEngine } from "./engine.js";
 import { buildBoard, attachPluckInteraction } from "./fretboard.js";
 import { attachBarMode } from "./bar.js";
+import { attachStrumLane } from "./strum.js";
 import { SCALES, applyScale } from "./scales.js";
 import { attachChordLabels, barChordName, currentRootPc } from "./chords.js";
 import { Looper } from "./looper.js";
@@ -70,18 +71,31 @@ attachPluckInteraction(board, {
 const barhint = document.getElementById("barhint");
 const barCtl = attachBarMode(board, {
   isActive: () => mode === "bar",
-  onStrum: (si, fret, velocity, delay) => sound(si, fret, velocity, delay),
   onGlide: glide,
   onBarMove: () => updateBarHint(),
+});
+
+// right-edge strum lane: open strings in Pluck mode; in Bar mode the strings
+// under the steel play fretted (and glide with it), the rest ring open
+attachStrumLane(board, {
+  onStrum: (si, velocity, delay) => {
+    const barred = mode === "bar" && barCtl.covers(si);
+    const fret = barred ? barCtl.fretFor(si) : 0;
+    const voice = sound(si, fret, velocity, delay);
+    if(barred) barCtl.registerVoice(voice, fret);
+  },
 });
 
 function updateBarHint(){
   barhint.hidden = mode !== "bar";
   if(mode !== "bar") return;
   const f = barCtl.fret;
+  const {top, bottom} = barCtl.span;
+  const partial = top > 0 || bottom < STRINGS.length - 1;
+  const which = partial ? ` on strings ${top + 1}–${bottom + 1}` : "";
   barhint.textContent = f === 0
     ? `open — ${barChordName(0)} · tap a fret to set the bar`
-    : `bar @ ${f} — ${barChordName(f)} · swipe to strum, drag to slide`;
+    : `bar @ ${f}${which}${partial ? "" : " — " + barChordName(f)} · strum the right lane · drag the bar to slide`;
 }
 
 document.querySelectorAll(".segbtn").forEach(b => {

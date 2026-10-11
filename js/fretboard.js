@@ -14,6 +14,7 @@ export function buildBoard(el){
     if(MARKERS[f] === "double") marker = '<span class="dot dbl">● ●</span>';
     html += `<div class="fretnum ${f === 0 ? "open" : ""}" data-fret="${f}">${f === 0 ? "Open" : f}${marker}</div>`;
   }
+  html += '<div class="lanehead">strum</div>';
 
   STRINGS.forEach((s, si) => {
     html += '<div class="gutter"></div>';
@@ -30,6 +31,8 @@ export function buildBoard(el){
                  <span class="${cls}">${pretty(note)}</span>
                </div>`;
     }
+    // right-edge strum pad for this string (see strum.js)
+    html += `<div class="lane" data-string="${si}" style="--gauge:${s.gauge}px"></div>`;
   });
 
   el.innerHTML = html;
@@ -70,6 +73,7 @@ export function attachPluckInteraction(el, {onPluck, onGlide, isActive = () => t
 
   el.addEventListener("pointerdown", e => {
     if(!isActive()) return;
+    if(e.target.closest?.(".lane")) return; // the strum lane has its own handler
     try{ el.setPointerCapture(e.pointerId); }catch(_e){ /* inactive pointer (e.g. synthetic events) */ }
     const st = {};
     pointers.set(e.pointerId, st);

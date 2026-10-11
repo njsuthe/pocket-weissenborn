@@ -93,7 +93,7 @@ h1 em{font-style:italic;color:var(--accent);}
 .board{
   position:relative;
   display:grid;
-  grid-template-columns:var(--gutter,72px) repeat(var(--frets,13),minmax(34px,1fr));
+  grid-template-columns:var(--gutter,72px) repeat(var(--frets,13),minmax(34px,1fr)) var(--lane,56px);
   width:100%;min-width:880px;
   background:linear-gradient(180deg,var(--board),var(--board2));
   border-radius:10px;
@@ -142,6 +142,26 @@ h1 em{font-style:italic;color:var(--accent);}
 
 /* blank left gutter — same footprint the string labels used to have */
 .gutter{background:#241a11;border-right:2px solid var(--wire);}
+
+/* strum lane: one pad per string down the right edge (the right thumb's home) */
+.lanehead{
+  color:var(--muted);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  text-align:center;padding:16px 0 12px;
+}
+.lane{
+  position:relative;background:#241a11;border-left:2px solid var(--wire);
+  border-bottom:1px solid #ffffff08;transition:background .14s ease;
+}
+.lane::before{
+  content:"";position:absolute;left:10px;right:10px;top:50%;
+  height:var(--gauge,2px);transform:translateY(-50%);
+  background:var(--wire);opacity:.5;border-radius:2px;
+}
+.lane.hit{background:#4a3624;}
+.lane.hit::before{opacity:1;}
+/* pads under the steel pick up a cool tint, so you can see what is barred */
+.board.barmode .lane.barred{background:#1f3532;}
+.board.barmode .lane.barred.hit{background:#2d5550;}
 
 .pill{
   position:relative;z-index:2;display:inline-flex;
@@ -213,7 +233,8 @@ h1 em{font-style:italic;color:var(--accent);}
 /* compact play layout — applied by JS (body.compact) in real landscape
    (max-height 560px) AND in rotated portrait, which media queries can't see */
 body.compact{padding:10px 14px calc(12px + env(safe-area-inset-bottom));}
-body.compact .board{--gutter:46px;} /* sized to sit under the camera island */
+body.compact .board{--gutter:46px;--lane:52px;} /* gutter sized to sit under the camera island */
+body.compact .lanehead{padding:8px 0 6px;font-size:9px;}
 body.compact header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:8px;}
 body.compact .eyebrow,
 body.compact .sub,
