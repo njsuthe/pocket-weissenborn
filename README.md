@@ -33,8 +33,11 @@ Once installed it runs full-screen and works offline.
   tuning is saved on the device.
 - **Scale highlighting:** pick a root and a scale (major, major pentatonic,
   minor pentatonic, blues, mixolydian, natural minor) to dim everything else.
-- **Chord labels:** the **chords** button names the straight-bar chord at every
-  fret, and it adapts to whatever tuning you are in.
+- **Chord labels:** the **chords** button names the chord at every fret, and it
+  adapts to whatever tuning you are in. In Bar mode the names follow what the
+  bar is actually covering: bar only the low strings and leave the top ones
+  open, and the labels show that voicing (for example Gadd9 in Open D) instead
+  of a plain G.
 - **Looper:** record a phrase, loop it, and overdub more layers on top. It
   records what you played (notes and slides), not audio.
 - **Landscape first:** the compact layout fits the whole neck. Portrait phones

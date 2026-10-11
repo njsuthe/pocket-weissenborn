@@ -69,10 +69,13 @@ attachPluckInteraction(board, {
 });
 
 const barhint = document.getElementById("barhint");
-const barCtl = attachBarMode(board, {
+// assigned below; the bar fires onBarMove while it is still being built, so
+// anything it triggers has to tolerate these being null
+let barCtl = null, chordCtl = null;
+barCtl = attachBarMode(board, {
   isActive: () => mode === "bar",
   onGlide: glide,
-  onBarMove: () => updateBarHint(),
+  onBarMove: f => { updateBarHint(); refreshChordLabels(false, f); },
 });
 
 // right-edge strum lane: open strings in Pluck mode; in Bar mode the strings
@@ -95,7 +98,22 @@ function updateBarHint(){
   const which = partial ? ` on strings ${top + 1}–${bottom + 1}` : "";
   barhint.textContent = f === 0
     ? `open — ${barChordName(0)} · tap a fret to set the bar`
-    : `bar @ ${f}${which}${partial ? "" : " — " + barChordName(f)} · strum the right lane · drag the bar to slide`;
+    : `bar @ ${f}${which} — ${barChordName(f, barCtl.span)} · strum the right lane · drag the bar to slide`;
+}
+
+// Fret-header chord names follow what is really sounding: in Bar mode the
+// strings under the steel are fretted and the rest ring open. Skips the DOM
+// work when nothing relevant changed (it is called on every drag move).
+let labelKey = "";
+function refreshChordLabels(force = false, fret = barCtl?.fret){
+  if(!barCtl || !chordCtl) return;
+  const bar = mode === "bar";
+  const span = bar ? barCtl.span : {top: 0, bottom: STRINGS.length - 1};
+  const active = bar && fret > 0 ? fret : -1;
+  const key = `${span.top}-${span.bottom}-${active}`;
+  if(!force && key === labelKey) return;
+  labelKey = key;
+  chordCtl.relabel(span, active);
 }
 
 document.querySelectorAll(".segbtn").forEach(b => {
@@ -104,6 +122,7 @@ document.querySelectorAll(".segbtn").forEach(b => {
     document.querySelectorAll(".segbtn").forEach(x => x.classList.toggle("active", x === b));
     board.classList.toggle("barmode", mode === "bar");
     updateBarHint();
+    refreshChordLabels();
   });
 });
 
@@ -118,7 +137,7 @@ rootSel.addEventListener("change", reScale);
 typeSel.addEventListener("change", reScale);
 
 // --- chord labels on fret headers ---
-const chordCtl = attachChordLabels(board, document.getElementById("chordsbtn"));
+chordCtl = attachChordLabels(board, document.getElementById("chordsbtn"));
 const legendRoot = document.getElementById("legendroot");
 
 // --- tuning: everything below derives from it, rebuilt on change ---
@@ -132,10 +151,10 @@ function retune(){
   buildBoard(board);
   barCtl.mount();               // buildBoard wiped the bar element
   barCtl.setFret(barCtl.fret);
-  chordCtl.relabel();
+  refreshChordLabels(true);     // buildBoard wiped the labels too
   reScale();
   updateBarHint();
-  legendRoot.textContent = `${pretty(CHROMATIC[currentRootPc()])} — the root note`;
+  legendRoot.textContent = pretty(CHROMATIC[currentRootPc()]);
   warmAll();
 }
 
@@ -152,12 +171,26 @@ const compactQs = [
   matchMedia("(max-height: 560px)"),
   matchMedia("(orientation: portrait) and (max-width: 760px)"),
 ];
+// The legend lives in the top bar (right of the audio chip) when the play
+// layout is wide enough for it — the height arm covers rotated portrait,
+// where the app is 844 wide on a 390-wide screen — and under the board otherwise.
+const legend = document.getElementById("legend");
+const wideQ = matchMedia("(min-width: 760px), (min-height: 760px)");
+function placeLegend(){
+  const inHeader = document.body.classList.contains("compact") && wideQ.matches;
+  legend.classList.toggle("inheader", inHeader);
+  if(inHeader) document.querySelector("header").appendChild(legend);
+  else document.querySelector(".note-foot").before(legend);
+}
+
 const setCompact = () => {
   const on = compactQs.some(q => q.matches);
   document.body.classList.toggle("compact", on);
   document.documentElement.classList.toggle("compact", on); // html needs it too, to lock scrolling
+  placeLegend();
 };
 compactQs.forEach(q => q.addEventListener("change", setCompact));
+wideQ.addEventListener("change", setCompact);
 setCompact();
 
 // iOS Safari ignores user-scalable=no for pinch — stop it here

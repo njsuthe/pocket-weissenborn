@@ -132,6 +132,7 @@ h1 em{font-style:italic;color:var(--accent);}
   font-size:12px;color:var(--accent);margin-top:3px;
 }
 .board.show-chords .chordname{display:block;}
+.chordname.unnamed{opacity:.45;}
 
 /* note cells */
 .cell{
@@ -253,6 +254,14 @@ body.compact .legend{
   margin-top:6px;gap:12px;flex-wrap:nowrap;white-space:nowrap;overflow:hidden;font-size:10px;
 }
 body.compact .legend .key{gap:5px;}
+/* short labels when the legend rides in the top bar */
+.legend .short{display:none;}
+.legend.inheader .long{display:none;}
+.legend.inheader .short{display:inline;}
+body.compact .legend.inheader{margin-top:0;flex:none;}
+/* the fret the steel is sitting on */
+.fretnum.barfret{color:var(--ink);}
+.fretnum.barfret .chordname{color:var(--ink);}
 body.compact .swatch{width:12px;height:12px;border-radius:4px;flex:none;}
 body.compact h1{font-size:24px;line-height:1;}
 body.compact .tuning{margin-top:0;}
