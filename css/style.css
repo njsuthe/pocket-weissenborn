@@ -244,11 +244,16 @@ h1 em{font-style:italic;color:var(--accent);}
 body.compact{padding:10px 14px calc(12px + env(safe-area-inset-bottom));}
 body.compact .board{--gutter:46px;--lane:52px;} /* gutter sized to sit under the camera island */
 body.compact .lanehead{padding:8px 0 6px;font-size:9px;}
-body.compact header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:8px;}
+body.compact header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:8px;padding-left:16px;} /* clear the phone's rounded corner */
 body.compact .eyebrow,
 body.compact .sub,
-body.compact .legend,
 body.compact .note-foot{display:none;}
+/* legend stays, squeezed onto one line under the board */
+body.compact .legend{
+  margin-top:6px;gap:12px;flex-wrap:nowrap;white-space:nowrap;overflow:hidden;font-size:10px;
+}
+body.compact .legend .key{gap:5px;}
+body.compact .swatch{width:12px;height:12px;border-radius:4px;flex:none;}
 body.compact h1{font-size:24px;line-height:1;}
 body.compact .tuning{margin-top:0;}
 body.compact .tuning .chip:not(.audiostate){display:none;}
@@ -260,9 +265,9 @@ body.compact .tunepanel{margin-top:6px;gap:10px;}
 body.compact .chordname{font-size:10px;margin-top:1px;}
 body.compact .boardscroll{margin-top:4px;padding-bottom:0;}
 body.compact .board{min-width:0;}
-body.compact .cell{height:clamp(36px,calc((var(--appH) - 150px)/6),52px);}
+body.compact .cell{height:clamp(36px,calc((var(--appH) - 176px)/6),52px);}
 /* tune panel adds a row — trim the board so it all stays on screen */
-body.compact.tuneopen .cell{height:clamp(30px,calc((var(--appH) - 190px)/6),52px);}
+body.compact.tuneopen .cell{height:clamp(30px,calc((var(--appH) - 216px)/6),52px);}
 body.compact .pill{min-width:28px;height:28px;font-size:12px;padding:0 5px;}
 body.compact .fretnum{padding:8px 0 6px;font-size:10px;}
 body.compact .fretnum .dot{width:5px;height:5px;margin-top:4px;}
