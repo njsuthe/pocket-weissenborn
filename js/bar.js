@@ -2,13 +2,13 @@ import { STRINGS, FRETS } from "./notes.js";
 
 /*
  * Bar mode: a virtual steel bar, always one full six-string length.
- * Tap a fret column to place it. Grab it anywhere along its length and drag:
- * sideways slides it along the neck (every string still ringing under it
- * glides along), and up or down moves it over the strings. Part of the bar
- * that would hang off the fretboard is cut away, so dragging down leaves it
- * covering only the low strings, dragging up only the high ones. Strings
- * outside the bar ring open. Touching anywhere other than the bar and
- * dragging sideways slides it too. Release snaps to the nearest fret.
+ * Tap a fret column to place it. Drag anywhere to slide it along the neck
+ * (every string still ringing under it glides along). Grab the bar itself and
+ * drag clearly up or down and it moves over the strings instead: part of the
+ * bar that would hang off the fretboard is cut away, so dragging down leaves
+ * it covering only the low strings, dragging up only the high ones. Strings
+ * outside the bar ring open. Each gesture does one or the other, decided in
+ * its first few pixels. Release (or a system cancel) snaps to the nearest fret.
  * Strumming happens in the strum lane (strum.js), so a second finger can
  * play while this one moves the steel.
  */
@@ -95,9 +95,11 @@ export function attachBarMode(board, {isActive, onGlide, onBarMove}){
     if(!isActive()) return;
     if(e.target.closest?.(".lane")) return; // the strum lane has its own handler
     try{ board.setPointerCapture(e.pointerId); }catch(_e){}
+    const cell = e.target.closest?.(".cell");
     pointers.set(e.pointerId, {
-      x0: e.clientX, y0: e.clientY, mode: null,
+      x0: e.clientX, y0: e.clientY, mode: null, moved: false,
       grab: onBar(e.clientX, e.clientY),
+      rowH: cell ? cell.offsetHeight : 36,
       pos0: pos, offset0: offset, m: null,
     });
     e.preventDefault();
@@ -110,41 +112,56 @@ export function attachBarMode(board, {isActive, onGlide, onBarMove}){
 
     if(!st.mode){
       const dx = Math.abs(e.clientX - st.x0), dy = Math.abs(e.clientY - st.y0);
-      if(Math.max(dx, dy) <= 12) return;
-      // on the bar: free 2-D drag. Off it: sideways slides, vertical does nothing.
-      st.mode = st.grab ? "grab" : dx > dy ? "drag" : "ignore";
+      if(Math.max(dx, dy) > 12) st.moved = true;
+      // A thumb arcs, so the first few pixels of a slide can be mostly
+      // vertical. So: sideways travel past 12px means slide, and only a long,
+      // straight run up or down (most of a string row, with almost no
+      // sideways drift) on the bar itself shifts it over the strings. Until
+      // one of those happens the gesture stays undecided, and once decided it
+      // is locked, so a drifting finger can't change which strings are covered.
+      if(dx > 12) st.mode = "slide";
+      else if(st.grab && dy > st.rowH * 0.7) st.mode = "shift";
+      if(!st.mode) return;
       st.m = metrics();
     }
-    if(st.mode === "ignore") return;
 
-    pos = Math.min(FRETS, Math.max(0, st.pos0 + (e.clientX - st.x0) / st.m.w));
-    if(st.mode === "grab"){
+    if(st.mode === "slide"){
+      pos = Math.min(FRETS, Math.max(0, st.pos0 + (e.clientX - st.x0) / st.m.w));
+      bar.style.display = pos > 0.01 ? "" : "none";
+      place(pos);
+      bendAll(false);
+    }else{
       const last = STRINGS.length - 1;
-      // whole string rows, so wobble during a slide doesn't change coverage
+      // whole string rows
       offset = Math.min(last, Math.max(-last, Math.round(st.offset0 + (e.clientY - st.y0) / st.m.rowH)));
     }
-    show();
-    place(pos);
     applySpan();
-    bendAll(false);
     onBarMove?.(Math.round(pos));
   });
+
+  // snap the steel to the nearest fret when a gesture ends — including when
+  // the system cancels it (iOS does this for edge swipes and alerts), so the
+  // bar can never be left stranded between frets
+  const settle = () => {
+    setFret(Math.round(pos));
+    bendAll(true);
+  };
 
   board.addEventListener("pointerup", e => {
     const st = pointers.get(e.pointerId);
     pointers.delete(e.pointerId);
     if(!isActive() || !st) return;
-    if(st.mode === "grab" || st.mode === "drag"){
-      setFret(Math.round(pos)); // snap the steel to the nearest fret
-      bendAll(true);
-      return;
-    }
-    if(st.mode) return;
+    if(st.mode){ settle(); return; }
+    if(st.moved) return; // a swipe that never became a slide isn't a tap
     const t = document.elementFromPoint(e.clientX, e.clientY);
     const withFret = t && t.closest("[data-fret]");
     if(withFret) setFret(+withFret.dataset.fret);
   });
-  board.addEventListener("pointercancel", e => pointers.delete(e.pointerId));
+  board.addEventListener("pointercancel", e => {
+    const st = pointers.get(e.pointerId);
+    pointers.delete(e.pointerId);
+    if(isActive() && st?.mode) settle();
+  });
 
   mount();
   setFret(0);
