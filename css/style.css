@@ -151,7 +151,11 @@ h1 em{font-style:italic;color:var(--accent);}
 .cell.open-col{background:#00000022;}
 
 /* blank left gutter — same footprint the string labels used to have */
-.gutter{background:#241a11;border-right:2px solid var(--wire);}
+.gutter{
+  background:#241a11;border-right:2px solid var(--wire);
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.gutter .ver{padding-bottom:3px;font-size:9px;color:var(--muted);opacity:.55;letter-spacing:.04em;}
 
 /* strum lane: one pad per string down the right edge (the right thumb's home) */
 .lanehead{
