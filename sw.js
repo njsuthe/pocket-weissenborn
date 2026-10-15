@@ -1,12 +1,18 @@
-// Bump VERSION on every release — the activate step drops old caches,
-// which is how clients pick up new files (fetch is cache-first).
-const VERSION = "pw-v14";
+// Bump VERSION on every release (and APP_VERSION in js/version.js to match).
+//
+// Strategy: the app's own files are NETWORK-FIRST — online, every launch gets
+// the latest, consistent set of files; the cache is only the offline fallback.
+// (An earlier cache-first version could pin an installed app to a mix of old
+// and new files: GitHub Pages lets browsers HTTP-cache files for 10 minutes,
+// so a precache taken right after a deploy could grab stale copies.)
+const VERSION = "pw-v15";
 
 const CORE = [
   "./",
   "index.html",
   "css/style.css",
   "js/app.js",
+  "js/version.js",
   "js/notes.js",
   "js/engine.js",
   "js/fretboard.js",
@@ -21,9 +27,15 @@ const CORE = [
   "icons/icon-512.png",
 ];
 
+const NETWORK_TIMEOUT_MS = 4000; // slow connection: fall back to the saved copy
+
 self.addEventListener("install", e => {
   e.waitUntil(
-    caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting())
+    caches.open(VERSION)
+      // cache:"reload" skips the browser's HTTP cache, so the precache is
+      // always a fresh, matching set
+      .then(c => c.addAll(CORE.map(u => new Request(u, {cache: "reload"}))))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -35,25 +47,39 @@ self.addEventListener("activate", e => {
   );
 });
 
+async function networkFirst(req){
+  const cache = await caches.open(VERSION);
+  try{
+    const res = await Promise.race([
+      fetch(req, {cache: "no-cache"}), // always revalidate with the server
+      new Promise((_, reject) => setTimeout(() => reject(new Error("slow")), NETWORK_TIMEOUT_MS)),
+    ]);
+    if(res.ok) cache.put(req, res.clone());
+    return res;
+  }catch(_e){
+    const hit = await cache.match(req, {ignoreSearch: true});
+    if(hit) return hit;
+    if(req.mode === "navigate") return (await cache.match("./")) || Response.error();
+    return Response.error();
+  }
+}
+
+// fonts never change for a given URL — cache-first is right for them
+async function cacheFirst(req){
+  const cache = await caches.open(VERSION);
+  const hit = await cache.match(req);
+  if(hit) return hit;
+  const res = await fetch(req);
+  if(res.ok) cache.put(req, res.clone());
+  return res;
+}
+
 self.addEventListener("fetch", e => {
   if(e.request.method !== "GET") return;
   const url = new URL(e.request.url);
-  const cacheable =
-    url.origin === location.origin ||
-    url.hostname.endsWith("fonts.googleapis.com") ||
-    url.hostname.endsWith("fonts.gstatic.com");
-  if(!cacheable) return;
-
-  e.respondWith(
-    caches.match(e.request).then(hit =>
-      hit ||
-      fetch(e.request).then(res => {
-        if(res.ok){
-          const copy = res.clone();
-          caches.open(VERSION).then(c => c.put(e.request, copy));
-        }
-        return res;
-      }).catch(() => caches.match("./"))
-    )
-  );
+  if(url.origin === location.origin){
+    e.respondWith(networkFirst(e.request));
+  }else if(url.hostname.endsWith("fonts.googleapis.com") || url.hostname.endsWith("fonts.gstatic.com")){
+    e.respondWith(cacheFirst(e.request));
+  }
 });

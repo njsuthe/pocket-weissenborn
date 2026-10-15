@@ -1,5 +1,6 @@
 import { STRINGS, FRETS, MARKERS, CHROMATIC, midiAt, pretty } from "./notes.js";
 import { currentRootPc } from "./chords.js";
+import { APP_VERSION } from "./version.js";
 
 export function buildBoard(el){
   el.style.setProperty("--frets", FRETS + 1);
@@ -17,7 +18,10 @@ export function buildBoard(el){
   html += '<div class="lanehead">strum</div>';
 
   STRINGS.forEach((s, si) => {
-    html += '<div class="gutter"></div>';
+    // the last gutter cell carries the release number, tiny
+    html += si === STRINGS.length - 1
+      ? `<div class="gutter"><span class="ver">v${APP_VERSION}</span></div>`
+      : '<div class="gutter"></div>';
     for(let f = 0; f <= FRETS; f++){
       const midi = midiAt(s, f);
       const note = CHROMATIC[midi % 12];
